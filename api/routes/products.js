@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
   res
     .status(200)
     .json({
@@ -9,7 +9,7 @@ router.get('/', (req, res) => {
     });
 });
 
-router.post('/', (req, res) => {
+router.post('/', (req, res, next) => {
   res
     .status(201)
     .json({
@@ -17,7 +17,7 @@ router.post('/', (req, res) => {
     });
 });
 
-router.get('/:productID', (req, res) => {
+router.get('/:productID', (req, res, next) => {
   const { productID } = req.params;
   // Using testing ID
   if (productID === 'correct') {
@@ -36,7 +36,7 @@ router.get('/:productID', (req, res) => {
   }
 });
 
-router.patch('/:productID', (req, res) => {
+router.patch('/:productID', (req, res, next) => {
   const { productID } = req.params;
   // Using testing ID
   if (productID === 'correct') {
@@ -55,7 +55,7 @@ router.patch('/:productID', (req, res) => {
   }
 });
 
-router.delete('/:productID', (req, res) => {
+router.delete('/:productID', (req, res, next) => {
   const { productID } = req.params;
   // Using testing ID
   if (productID === 'correct') {

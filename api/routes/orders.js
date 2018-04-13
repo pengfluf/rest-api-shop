@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
   res
     .status(200)
     .json({
@@ -9,7 +9,7 @@ router.get('/', (req, res) => {
     });
 });
 
-router.get('/:orderID', (req, res) => {
+router.get('/:orderID', (req, res, next) => {
   const { orderID } = req.params;
   res
     .status(200)
@@ -19,7 +19,7 @@ router.get('/:orderID', (req, res) => {
     });
 });
 
-router.post('/', (req, res) => {
+router.post('/', (req, res, next) => {
   res
     .status(201)
     .json({
@@ -27,7 +27,7 @@ router.post('/', (req, res) => {
     });
 });
 
-router.delete('/:orderID', (req, res) => {
+router.delete('/:orderID', (req, res, next) => {
   const { orderID } = req.params;
   res
     .status(200)
