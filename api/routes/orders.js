@@ -20,10 +20,16 @@ router.get('/:orderID', (req, res, next) => {
 });
 
 router.post('/', (req, res, next) => {
+  const { productID, quantity } = req.body;
+  const order = {
+    productID,
+    quantity,
+  };
   res
     .status(201)
     .json({
-      message: 'It came from POST /orders/:orderID',
+      message: 'It came from POST /orders',
+      order,
     });
 });
 
