@@ -1,11 +1,15 @@
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const productRoutes = require('./api/routes/products');
 const orderRoutes = require('./api/routes/orders');
 
 const app = express();
+
+// Connecting to MongoDB
+mongoose.connect(`mongodb://new-user_31:${process.env.MONGO_ATLAS_PASSWORD}@cluster0-shard-00-00-28wqd.mongodb.net:27017,cluster0-shard-00-01-28wqd.mongodb.net:27017,cluster0-shard-00-02-28wqd.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin`);
 
 // Console Logging
 app.use(morgan('dev'));
