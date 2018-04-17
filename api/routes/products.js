@@ -7,14 +7,26 @@ const Product = require('../models/product');
 router.get('/', (req, res, next) => {
   Product
     .find()
+    .select('_id name price')
     // exec is needed for Promise
     .exec()
     .then(
-      (result) => {
-        console.log(result);
+      (products) => {
+        const response = {
+          productsAmount: products.length,
+          products: products.map((product) => ({
+            _id: product._id,
+            name: product.name,
+            price: product.price,
+            request: {
+              type: 'GET',
+              url: `http://localhost:3002/products/${product._id}`,
+            },
+          })),
+        };
         res
           .status(200)
-          .json(result);
+          .json(response);
       },
       (err) => {
         console.error(err);
@@ -38,12 +50,19 @@ router.post('/', (req, res, next) => {
     .save()
     .then(
       (result) => {
-        console.log(result);
         res
           .status(201)
           .json({
-            message: 'It came from POST /products',
-            product,
+            message: 'Product successfully created',
+            product: {
+              _id: result._id,
+              name: result.name,
+              price: result.price,
+              request: {
+                type: 'POST',
+                url: `http://localhost:3002/products/${result._id}`,
+              },
+            },
           });
       },
       (err) => {
@@ -61,17 +80,24 @@ router.get('/:productID', (req, res, next) => {
   const { productID } = req.params;
 
   Product.findById(productID)
+    .select('_id name price')
     // exec is needed for Promise
     .exec()
     .then(
-      (result) => {
-        console.log(result);
-        if (result) {
+      (product) => {
+        if (product) {
           res
             .status(200)
-            .json(result);
+            .json({
+              _id: product._id,
+              name: product.name,
+              price: product.price,
+              request: {
+                type: 'GET',
+                url: `http://localhost:3002/products/${product._id}`,
+              },
+            });
         } else {
-          console.log('There\'s no such product.');
           res
             .status(404)
             .json({
@@ -82,7 +108,6 @@ router.get('/:productID', (req, res, next) => {
         }
       },
       (err) => {
-        console.error(err);
         res
           .status(500)
           .json({ error: err });
@@ -102,23 +127,29 @@ router.patch('/:productID', (req, res, next) => {
       // a new variable for each iteration
       updateOps[operation[0]] = operation[1];
     });
-  console.log(updateOps);
 
   Product
     .update(
       { _id: productID },
       { $set: updateOps }
     )
+    // exec is needed for Promise
     .exec()
     .then(
-      (result) => {
-        console.log(result);
+      (info) => {
         res
           .status(200)
-          .json(result);
+          .json({
+            ok: info.ok,
+            message: 'Product successfully updated',
+            _id: productID,
+            request: {
+              type: 'PATCH',
+              url: `http://localhost:3002/products/${productID}`,
+            },
+          });
       },
       (err) => {
-        console.error(err);
         res
           .status(500)
           .json({
@@ -137,14 +168,20 @@ router.delete('/:productID', (req, res, next) => {
     // exec is needed for Promise
     .exec()
     .then(
-      (result) => {
-        console.log(result);
+      (info) => {
         res
           .status(200)
-          .json(result);
+          .json({
+            ok: info.ok,
+            message: 'Product successfully deleted',
+            _id: productID,
+            request: {
+              type: 'DELETE',
+              url: `http://localhost:3002/products/${productID}`,
+            },
+          });
       },
       (err) => {
-        console.error(err);
         res
           .status(500)
           .json({
