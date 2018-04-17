@@ -29,7 +29,6 @@ router.get('/', (req, res, next) => {
           .json(response);
       },
       (err) => {
-        console.error(err);
         res
           .status(500)
           .json({
@@ -66,7 +65,6 @@ router.post('/', (req, res, next) => {
           });
       },
       (err) => {
-        console.error(err);
         res
           .status(500)
           .json({
