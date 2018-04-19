@@ -8,7 +8,8 @@ const Product = require('../models/product');
 router.get('/', (req, res, next) => {
   Order
     .find()
-    .select('_id productID quantity')
+    .select('_id product quantity')
+    .populate('product', '_id name price')
     .exec()
     .then((orders) => {
       res
@@ -17,7 +18,7 @@ router.get('/', (req, res, next) => {
           ordersAmount: orders.length,
           orders: orders.map((order) => ({
             _id: order._id,
-            productID: order.productID,
+            product: order.product,
             quantity: order.quantity,
             request: {
               type: 'GET',
@@ -39,7 +40,8 @@ router.get('/:orderID', (req, res, next) => {
   const { orderID } = req.params;
 
   Order.findById(orderID)
-    .select('_id productID quantity')
+    .select('_id product quantity')
+    .populate('product', '_id name price')
     .exec()
     .then((order) => {
       if (order) {
@@ -47,7 +49,7 @@ router.get('/:orderID', (req, res, next) => {
           .status(200)
           .json({
             _id: order._id,
-            productID: order.productID,
+            product: order.product,
             quantity: order.quantity,
             request: {
               type: 'GET',
@@ -86,9 +88,12 @@ router.post('/', (req, res, next) => {
             },
           });
       }
+
       const order = new Order({
         _id: mongoose.Types.ObjectId(),
-        productID,
+        product: {
+          _id: productID,
+        },
         quantity,
       });
       // save() gives us Promise
@@ -103,7 +108,7 @@ router.post('/', (req, res, next) => {
           message: 'Order successfully created',
           product: {
             _id: result._id,
-            productID: result.productID,
+            product: result.product,
             quantity: result.quantity,
             request: {
               type: 'POST',
