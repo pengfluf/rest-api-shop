@@ -1,13 +1,40 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, './uploads');
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${new Date().toISOString()}-${file.originalname}`);
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  // reject a fileSize
+  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 1024 * 1024 * 5, // 5 MB
+  },
+  fileFilter,
+});
 
 const Product = require('../models/product');
 
 router.get('/', (req, res, next) => {
   Product
     .find()
-    .select('_id name price')
+    .select('_id name price productImage')
     // exec is needed for Promise
     .exec()
     .then((products) => {
@@ -19,6 +46,7 @@ router.get('/', (req, res, next) => {
             _id: product._id,
             name: product.name,
             price: product.price,
+            productImage: product.productImage,
             request: {
               type: 'GET',
               url: `http://localhost:3002/products/${product._id}`,
@@ -35,12 +63,14 @@ router.get('/', (req, res, next) => {
     });
 });
 
-router.post('/', (req, res, next) => {
+router.post('/', upload.single('productImage'), (req, res, next) => {
   const { name, price } = req.body;
+  const productImage = req.file.path;
   const product = new Product({
     _id: new mongoose.Types.ObjectId(),
     name,
     price,
+    productImage,
   });
   product
     .save()
@@ -53,6 +83,7 @@ router.post('/', (req, res, next) => {
             _id: result._id,
             name: result.name,
             price: result.price,
+            productImage: result.productImage,
             request: {
               type: 'POST',
               url: `http://localhost:3002/products/${result._id}`,
@@ -73,7 +104,7 @@ router.get('/:productID', (req, res, next) => {
   const { productID } = req.params;
 
   Product.findById(productID)
-    .select('_id name price')
+    .select('_id name price productImage')
     // exec is needed for Promise
     .exec()
     .then((product) => {

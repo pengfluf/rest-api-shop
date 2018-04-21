@@ -14,6 +14,9 @@ mongoose.connect(`mongodb://new-user_31:${process.env.MONGO_ATLAS_PASSWORD}@clus
 // Console Logging
 app.use(morgan('dev'));
 
+// Make 'uploads' folder publicly available
+app.use('/uploads', express.static('uploads'));
+
 // Request Body Parsing
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
