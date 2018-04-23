@@ -1,148 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 
-const User = require('../models/user');
+const checkAuth = require('../middleware/checkAuth');
 
-router.post('/signup', (req, res, next) => {
-  const { email, password } = req.body;
+const {
+  signup,
+  login,
+  deleteUser,
+} = require('../controllers/user');
 
-  User.find({
-    email,
-  })
-    .exec()
-    // Check if this email is already taken
-    .then((user) => {
-      if (user.length >= 1) {
-        return res
-          .status(409)
-          .json({
-            message: 'This email address is already taken.',
-          });
-      }
-      // If the email isn't taken, just sign up
-      bcrypt.hash(password, 10, (err, hash) => {
-        if (err) {
-          return res
-            .status(500)
-            .json({
-              error: err,
-            });
-        }
-        const user = new User({
-          _id: new mongoose.Types.ObjectId(),
-          email,
-          password: hash,
-        });
-        user
-          .save()
-          .then((result) => {
-            res
-              .status(201)
-              .json({ result });
-          })
-          .catch((error) => res
-            .status(500)
-            .json({ error }));
-      });
-    });
-});
+router.post('/signup', signup);
 
-router.post('/login', (req, res, next) => {
-  const { email, password } = req.body;
-  User.findOne({
-    email,
-  })
-    .exec()
-    .then((user) => {
-      if (!user) {
-        return res
-          .status(401)
-          .json({
-            message: 'Unauthorized.',
-          });
-      }
-      bcrypt.compare(
-        password,
-        user.password,
-        (err, result) => {
-          if (err) {
-            return res
-              .status(401)
-              .json({
-                message: 'Unauthorized.',
-              });
-          }
-          if (result) {
-            const token = jwt.sign(
-              {
-                email: user.email,
-                userID: user._id,
-              },
-              process.env.JWT_KEY,
-              {
-                expiresIn: '1h',
-              },
-            );
-            return res
-              .status(200)
-              .json({
-                message: 'Authorized successfully',
-                token,
-              });
-          }
-          return res
-            .status(401)
-            .json({
-              message: 'Unauthorized.',
-            });
-        }
-      );
-    })
-    .catch((err) => {
-      res
-        .status(500)
-        .json({
-          error: err,
-        });
-    });
-});
+router.post('/login', login);
 
-router.delete('/:userID', (req, res, next) => {
-  const { userID } = req.params;
-
-  User.findById(userID)
-    .then((user) => {
-      if (user) {
-        return User
-          .remove({
-            _id: userID,
-          })
-          .exec();
-      }
-      return res
-        .status(404)
-        .json({
-          error: 'User with this ID doesn\'t exist.',
-        });
-    })
-    .then((info) => {
-      res
-        .status(200)
-        .json({
-          ok: info.ok,
-          message: 'User successfully deleted.',
-        });
-    })
-    .catch((err) => {
-      res
-        .status(500)
-        .json({
-          error: err,
-        });
-    });
-});
+// Just for development
+router.delete('/:userID', checkAuth, deleteUser);
 
 module.exports = router;
