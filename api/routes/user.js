@@ -1,0 +1,87 @@
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+
+const User = require('../models/user');
+
+router.post('/signup', (req, res, next) => {
+  const { email, password } = req.body;
+
+  User.find({
+    email,
+  })
+    .exec()
+    // Check if this email is already taken
+    .then((user) => {
+      if (user.length >= 1) {
+        return res
+          .status(409)
+          .json({
+            message: 'This email address is already taken.',
+          });
+      }
+      // If the email isn't taken, just sign up
+      bcrypt.hash(password, 10, (err, hash) => {
+        if (err) {
+          return res
+            .status(500)
+            .json({
+              error: err,
+            });
+        }
+        const user = new User({
+          _id: new mongoose.Types.ObjectId(),
+          email,
+          password: hash,
+        });
+        user
+          .save()
+          .then((result) => {
+            res
+              .status(201)
+              .json({ result });
+          })
+          .catch((error) => res
+            .status(500)
+            .json({ error }));
+      });
+    });
+});
+
+router.delete('/:userID', (req, res, next) => {
+  const { userID } = req.params;
+
+  User.findById(userID)
+    .then((user) => {
+      if (user) {
+        return User
+          .remove({
+            _id: userID,
+          })
+          .exec();
+      }
+      return res
+        .status(404)
+        .json({
+          error: 'User with this ID doesn\'t exist.',
+        });
+    })
+    .then((info) => {
+      res
+        .status(200)
+        .json({
+          ok: info.ok,
+          message: 'User successfully deleted.',
+        });
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .json({
+          error: err,
+        });
+    });
+});
+
+module.exports = router;
