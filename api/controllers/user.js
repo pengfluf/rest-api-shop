@@ -94,7 +94,7 @@ exports.login = (req, res, next) => {
             return res
               .status(200)
               .json({
-                message: 'Authorized successfully',
+                message: 'Authorized successfully.',
                 token,
               });
           }
@@ -115,7 +115,37 @@ exports.login = (req, res, next) => {
     });
 };
 
-exports.deleteUser = (req, res, next) => {
+exports.getAccountInfo = (req, res, next) => {
+  const { userID } = req.params;
+
+  User.findById(userID)
+    .then((user) => {
+      if (user) {
+        return res
+          .status(200)
+          .json({
+            _id: user._id,
+            email: user.email,
+          });
+      }
+      return res
+        .status(401)
+        .json({
+          error: {
+            message: 'Unauthorized.',
+          },
+        });
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .json({
+          error: err,
+        });
+    });
+};
+
+exports.deleteAccount = (req, res, next) => {
   const { userID } = req.params;
 
   User.findById(userID)
@@ -125,20 +155,22 @@ exports.deleteUser = (req, res, next) => {
           .remove({
             _id: userID,
           })
-          .exec();
+          .exec()
+          .then((info) => {
+            res
+              .status(200)
+              .json({
+                ok: info.ok,
+                message: 'Account successfully deleted.',
+              });
+          });
       }
       return res
-        .status(404)
+        .status(401)
         .json({
-          error: 'User with this ID doesn\'t exist.',
-        });
-    })
-    .then((info) => {
-      res
-        .status(200)
-        .json({
-          ok: info.ok,
-          message: 'User successfully deleted.',
+          error: {
+            message: 'Unauthorized.',
+          },
         });
     })
     .catch((err) => {

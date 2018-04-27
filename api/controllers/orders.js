@@ -102,15 +102,13 @@ exports.createOrder = (req, res, next) => {
       res
         .status(201)
         .json({
-          message: 'Order successfully created',
-          product: {
-            _id: result._id,
-            product: result.product,
-            quantity: result.quantity,
-            request: {
-              type: 'POST',
-              url: `http://localhost:3002/products/${result._id}`,
-            },
+          message: 'Order successfully created.',
+          _id: result._id,
+          quantity: result.quantity,
+          product: result.product,
+          request: {
+            type: 'POST',
+            url: `http://localhost:3002/products/${result._id}`,
           },
         });
     })
@@ -133,25 +131,25 @@ exports.deleteOrder = (req, res, next) => {
           .remove({
             _id: orderID,
           })
-          .exec();
+          .exec()
+          .then((info) => {
+            res
+              .status(200)
+              .json({
+                ok: info.ok,
+                message: 'Order successfully deleted',
+                _id: orderID,
+                request: {
+                  type: 'DELETE',
+                  url: `http://localhost:3002/orders/${orderID}`,
+                },
+              });
+          });
       }
       return res
         .status(404)
         .json({
           error: 'Order with this ID doesn\'t exist.',
-        });
-    })
-    .then((info) => {
-      res
-        .status(200)
-        .json({
-          ok: info.ok,
-          message: 'Order successfully deleted',
-          _id: orderID,
-          request: {
-            type: 'DELETE',
-            url: `http://localhost:3002/orders/${orderID}`,
-          },
         });
     })
     .catch((err) => {

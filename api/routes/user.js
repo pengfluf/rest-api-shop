@@ -1,19 +1,21 @@
 const express = require('express');
 const router = express.Router();
 
-const checkAuth = require('../middleware/checkAuth');
+const checkItsMyAccount = require('../middleware/checkItsMyAccount');
 
 const {
   signup,
   login,
-  deleteUser,
+  getAccountInfo,
+  deleteAccount,
 } = require('../controllers/user');
 
 router.post('/signup', signup);
 
 router.post('/login', login);
 
-// Just for development
-router.delete('/:userID', checkAuth, deleteUser);
+router.get('/:userID', checkItsMyAccount, getAccountInfo);
+
+router.delete('/:userID', checkItsMyAccount, deleteAccount);
 
 module.exports = router;

@@ -48,6 +48,7 @@ exports.getProduct = (req, res, next) => {
             _id: product._id,
             name: product.name,
             price: product.price,
+            productImage: product.productImage,
             request: {
               type: 'GET',
               url: `http://localhost:3002/products/${product._id}`,
@@ -85,7 +86,7 @@ exports.createProduct = (req, res, next) => {
       res
         .status(201)
         .json({
-          message: 'Product successfully created',
+          message: 'Product successfully created.',
           product: {
             _id: result._id,
             name: result.name,
@@ -132,7 +133,7 @@ exports.updateProduct = (req, res, next) => {
         .status(200)
         .json({
           ok: info.ok,
-          message: 'Product successfully updated',
+          message: 'Product successfully updated.',
           _id: productID,
           request: {
             type: 'PATCH',
@@ -152,24 +153,35 @@ exports.updateProduct = (req, res, next) => {
 exports.deleteProduct = (req, res, next) => {
   const { productID } = req.params;
 
-  Product.remove({
-    _id: productID,
-  })
-    // exec is needed for Promise
-    .exec()
-    .then((info) => {
-      res
-        .status(200)
+  Product.findById(productID)
+    .then((product) => {
+      if (product) {
+        return Product
+          .remove({
+            _id: productID,
+          })
+          .exec()
+          .then((info) => {
+            res
+              .status(200)
+              .json({
+                ok: info.ok,
+                message: 'Product successfully deleted',
+                _id: productID,
+                request: {
+                  type: 'DELETE',
+                  url: `http://localhost:3002/products/${productID}`,
+                },
+              });
+          });
+      }
+      return res
+        .status(404)
         .json({
-          ok: info.ok,
-          message: 'Product successfully deleted',
-          _id: productID,
-          request: {
-            type: 'DELETE',
-            url: `http://localhost:3002/products/${productID}`,
-          },
+          error: 'Product with this ID doesn\'t exist.',
         });
     })
+
     .catch((err) => {
       res
         .status(500)
