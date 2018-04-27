@@ -19,7 +19,7 @@ exports.getAllOrders = (req, res, next) => {
             quantity: order.quantity,
             request: {
               type: 'GET',
-              url: `http://localhost:3002/products/${order._id}`,
+              url: `http://localhost:3002/orders/${order._id}`,
             },
           })),
         });
@@ -50,7 +50,7 @@ exports.getOrder = (req, res, next) => {
             quantity: order.quantity,
             request: {
               type: 'GET',
-              url: `http://localhost:3002/products/${order._id}`,
+              url: `http://localhost:3002/orders/${order._id}`,
             },
           });
       } else {
@@ -108,7 +108,7 @@ exports.createOrder = (req, res, next) => {
           product: result.product,
           request: {
             type: 'POST',
-            url: `http://localhost:3002/products/${result._id}`,
+            url: `http://localhost:3002/orders/${result._id}`,
           },
         });
     })
